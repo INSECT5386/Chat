@@ -3,64 +3,137 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>챗봇 웹 UI</title>
+<title>S3GeN 챗봇</title>
 <style>
-  body {
-    font-family: '나눔고딕', 돋움, Dotum, sans-serif;
-    margin: 30px;
-    background: #f4f6f8;
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&display=swap');
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: #1e1e1e;
+    font-family: 'Noto Sans KR', sans-serif;
+
+    /* 은은한 광택 배경 */
+    background: linear-gradient(135deg, #2a2a2a 0%, #1e1e1e 50%, #2a2a2a 100%);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
   }
+
   #chat {
-    max-width: 600px;
-    margin: 0 auto;
-    background: white;
-    border-radius: 8px;
+    max-width: 700px;
+    max-height: 90vh;
+    margin: 30px auto;
     padding: 20px;
-    box-shadow: 0 2px 10px rgb(0 0 0 / 0.1);
-    height: 80vh;
+    box-sizing: border-box;
+    background: #282828;
+    border-radius: 16px;
+    box-shadow:
+      0 8px 24px rgba(0,0,0,0.8),
+      inset 0 0 50px 2px rgba(255, 255, 255, 0.04);
     display: flex;
     flex-direction: column;
+    overflow: hidden;
   }
+
   #messages {
     flex-grow: 1;
     overflow-y: auto;
-    padding-bottom: 10px;
-    margin-bottom: 10px;
-    border-bottom: 1px solid #eee;
+    padding-right: 12px;
+    scroll-behavior: smooth;
   }
+
   .message {
-    margin: 6px 0;
+    position: relative;
+    margin: 12px 0;
+    line-height: 1.6;
+    padding: 12px 20px;
+    border-radius: 20px;
+    max-width: 75%;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    animation: fadeIn 0.3s ease-in;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
   }
-  .user {
-    color: #0066cc;
-    font-weight: bold;
-  }
+
+  /* 봇 메시지: 왼쪽 정렬, border-left */
   .bot {
-    color: #444;
+    align-self: flex-start;
+    background: #3a3a3a;
+    color: #f0f0f0;
+    text-align: left;
+    margin-left: 8px;
+    border-left: 4px solid #d16a6a;
+    padding-left: 16px;
   }
+
+  /* 유저 메시지: 오른쪽 정렬, 봇 말풍선 좌우 반전 스타일 */
+  .user {
+    align-self: flex-end;
+    background: #3a3a3a;
+    color: #f0f0f0;
+    text-align: right;
+    margin-right: 8px;
+    border-right: 4px solid #d16a6a;
+    padding-right: 16px;
+  }
+
+  .user::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    right: 20%;
+    width: 60%;
+    height: 10px;
+    background: linear-gradient(60deg, rgba(255,255,255,0.15), rgba(255,255,255,0));
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(3px);
+    transform: rotate(20deg);
+  }
+
   #inputForm {
     display: flex;
+    border-top: 1px solid #444;
+    padding-top: 14px;
+    margin-top: 14px;
   }
+
   #inputForm input[type="text"] {
     flex-grow: 1;
-    padding: 10px 12px;
+    padding: 14px 18px;
     font-size: 16px;
-    border: 1px solid #ddd;
-    border-radius: 4px 0 0 4px;
+    background-color: #2c2c2c;
+    color: #eee;
+    border: 1px solid #555;
+    border-radius: 8px 0 0 8px;
     outline: none;
   }
+
   #inputForm button {
-    background-color: #0066cc;
+    background: linear-gradient(145deg, #d16a6a, #ff8a8a);
     color: white;
     border: none;
-    padding: 0 18px;
+    padding: 0 24px;
     font-size: 16px;
     cursor: pointer;
-    border-radius: 0 4px 4px 0;
-    transition: background-color 0.2s;
+    border-radius: 0 8px 8px 0;
+    transition: all 0.25s ease-in-out;
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.5),
+      inset 0 0 10px rgba(255, 140, 140, 0.6);
   }
+
   #inputForm button:hover {
-    background-color: #004999;
+    background: linear-gradient(145deg, #ff8a8a, #d16a6a);
+    box-shadow:
+      0 4px 12px rgba(255, 100, 100, 0.8),
+      inset 0 0 15px rgba(255, 255, 255, 0.7);
+    transform: scale(1.02);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 </style>
 </head>
@@ -96,13 +169,11 @@
     appendMessage('You: ' + message, 'user');
     messageInput.value = '';
 
-    // 기존 EventSource 닫기
     if (eventSource) {
       eventSource.close();
       eventSource = null;
     }
 
-    // 서버 SSE 연결
     const url = 'https://yuchan5386-api-0.hf.space/chat?message=' + encodeURIComponent(message);
     eventSource = new EventSource(url);
 
@@ -116,7 +187,6 @@
       if (event.data === '[DONE]') {
         eventSource.close();
         eventSource = null;
-        appendMessage('대화 종료', 'bot');
         return;
       }
 
@@ -129,7 +199,6 @@
         accumulatedResponse += ' ' + token;
       }
 
-      // 업데이트 메시지 보여주기 (마지막 메시지 계속 갱신)
       const lastBotMessage = messagesDiv.querySelector('.bot:last-child');
       if (lastBotMessage) {
         lastBotMessage.textContent = accumulatedResponse;
@@ -145,7 +214,7 @@
         eventSource.close();
         eventSource = null;
       }
-      appendMessage('오류가 발생했습니다.', 'bot');
+      appendMessage('❌ 오류가 발생했습니다.', 'bot');
     };
   });
 </script>

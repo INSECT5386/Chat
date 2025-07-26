@@ -90,6 +90,17 @@ html, body {
   box-sizing: border-box;
 }
 
+#logoArea {
+  display: flex;
+  justify-content: center;
+  padding: 10px 0 0 0;
+  position: relative;
+  z-index: 5;
+  user-select: none;
+  filter: drop-shadow(0 0 8px #00ffff);
+}
+
+
 .orbit {
   position: absolute;
   top: 50%;
@@ -274,6 +285,29 @@ html, body {
 </head>
 <body>
   <div id="appContainer">
+    <div id="logoArea">
+        <svg id="s3genLogo" width="220" height="100" viewBox="0 0 220 100" xmlns="http://www.w3.org/2000/svg" aria-label="S3GeN 별자리 로고" role="img">
+          <!-- 별 위치 -->
+          <circle cx="20" cy="50" r="4" fill="#00ffff" />
+          <circle cx="60" cy="20" r="4" fill="#00ffff" />
+          <circle cx="100" cy="40" r="4" fill="#00ffff" />
+          <circle cx="140" cy="25" r="4" fill="#00ffff" />
+          <circle cx="180" cy="55" r="4" fill="#00ffff" />
+          <circle cx="200" cy="80" r="4" fill="#00ffff" />
+          
+          <!-- 별자리 선 연결 -->
+          <line x1="20" y1="50" x2="60" y2="20" stroke="#00ffff" stroke-width="1.5" />
+          <line x1="60" y1="20" x2="100" y2="40" stroke="#00ffff" stroke-width="1.5" />
+          <line x1="100" y1="40" x2="140" y2="25" stroke="#00ffff" stroke-width="1.5" />
+          <line x1="140" y1="25" x2="180" y2="55" stroke="#00ffff" stroke-width="1.5" />
+          <line x1="180" y1="55" x2="200" y2="80" stroke="#00ffff" stroke-width="1.5" />
+          
+          <!-- S3GeN 텍스트 -->
+          <text x="110" y="95" fill="#00ffff" font-family="'Noto Sans KR', sans-serif" font-weight="700" font-size="24" letter-spacing="4" text-anchor="middle" >
+            S3GeN
+          </text>
+        </svg>
+      </div>
     <div id="chatArea">
       <div class="orbit"></div> <!-- 빨강/파랑 orbit 대신 이거 하나만 -->
       <div id="messages"></div>

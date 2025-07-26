@@ -3,178 +3,292 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>S3GeN 챗봇 - 업그레이드 버전</title>
+<title>S3GeN</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&display=swap');
 
-  html, body {
-    margin: 0; padding: 0;
-    height: 100%;
-    background: linear-gradient(135deg, #2a2a2a 0%, #1e1e1e 50%, #2a2a2a 100%);
-    font-family: 'Noto Sans KR', sans-serif;
-    color: #eee;
-    overflow: hidden;
-  }
+html, body {
+  margin: 0; padding: 0; height: 100%;
+  background: linear-gradient(145deg, #010e16 ,#0a386d);
+  font-family: 'Noto Sans KR', sans-serif;
+  color: #EEEEEE;
+  overflow: hidden;
+}
 
-  #chat {
-    max-width: 720px;
-    height: 100vh;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    background: #111;
-    border-radius: 24px;
-    box-shadow:
-      0 0 40px 10px rgba(209, 106, 106, 0.4);
-    overflow: hidden;
-  }
+#appContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;  /* 꼭 100vh로 꽉 차게 */
+  width: 100%;
+}
 
-  #messagesContainer {
-    flex-grow: 1;
-    background: linear-gradient(135deg, #292929 0%, #1a1a1a 100%);
-    padding: 20px 28px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: #d16a6a transparent;
-    box-shadow:
-      inset 0 5px 20px -10px rgba(209, 106, 106, 0.8);
-  }
-  #messagesContainer::-webkit-scrollbar {
-    width: 8px;
-  }
-  #messagesContainer::-webkit-scrollbar-thumb {
-    background-color: #d16a6a;
-    border-radius: 10px;
-  }
-  #messagesContainer::-webkit-scrollbar-track {
-    background: transparent;
-  }
+/* 화면 테두리 플라즈마 효과 */
+#appContainer::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  border: 4px solid;
+  border-image: linear-gradient(
+    270deg,
+    #00ffff,
+    #0088ff,
+    #00ffff,
+    #0044ff,
+    #00ffff
+  ) 1;
+  border-radius: 12px;
+  box-shadow:
+    0 0 15px #00ffff,
+    0 0 30px #0088ff,
+    0 0 45px #00ffff,
+    0 0 60px #0044ff;
+  animation: plasmaFlow 3s linear infinite;
+  z-index: 10;
+}
 
-  #messages {
-    display: flex;
-    flex-direction: column;
+@keyframes plasmaFlow {
+  0% {
+    border-image-source: linear-gradient(
+      270deg,
+      #00ffff,
+      #0088ff,
+      #00ffff,
+      #0044ff,
+      #00ffff
+    );
   }
+  50% {
+    border-image-source: linear-gradient(
+      90deg,
+      #00ffff,
+      #0044ff,
+      #00ffff,
+      #0088ff,
+      #00ffff
+    );
+  }
+  100% {
+    border-image-source: linear-gradient(
+      270deg,
+      #00ffff,
+      #0088ff,
+      #00ffff,
+      #0044ff,
+      #00ffff
+    );
+  }
+}
 
-  .message {
-    margin: 10px 0;
-    padding: 14px 22px;
-    max-width: 70%;
-    border-radius: 24px;
-    font-size: 16px;
-    line-height: 1.5;
-    word-wrap: break-word;
-    white-space: pre-wrap;
-    box-shadow:
-      0 4px 15px rgba(0,0,0,0.5);
-    animation: fadeIn 0.3s ease-in;
-    position: relative;
-  }
 
-  .bot {
-    align-self: flex-start;
-    background: linear-gradient(145deg, #4a2626, #6a3a3a);
-    color: #ffeaea;
-    border-left: 8px solid #d16a6a;
-    padding-left: 28px;
-    margin-left: 24px;
-    text-align: left;
-  }
+#chatArea {
+  flex-grow: 1;       /* 화면 다 먹고 */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 60px 30px 20px 30px; /* 위쪽 넉넉히, 아래는 약간 */
+  box-sizing: border-box;
+}
 
-  .user {
-    align-self: flex-end;
-    background: linear-gradient(145deg, #d16a6a, #ff8a8a);
-    color: #fff9f9;
-    border-right: 8px solid #8a2f2f;
-    padding-right: 28px;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    filter: drop-shadow(0 0 3px #ff6a6a);
-    margin-right: 16px;
-    text-align: right;
-  }
+.orbit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 220px;
+  height: 220px;
+  margin: -110px 0 0 -110px;
+  border-radius: 50%;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at center, #000000 50%, transparent 85%),
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 60%, transparent 90%);
+  box-shadow:
+    inset 0 0 80px 30px rgba(0, 0, 0, 0.95),
+    0 0 40px 20px rgba(255, 255, 255, 0.05);
+  filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.1));
+  animation: slowRotate 20s linear infinite;
+  z-index: 0;
+  transform-style: preserve-3d;
+}
 
-  .user::before {
-    content: '';
-    position: absolute;
-    top: 12px;
-    right: 22%;
-    width: 60%;
-    height: 12px;
-    background: linear-gradient(60deg, rgba(255,255,255,0.2), rgba(255,255,255,0));
-    border-radius: 50%;
-    pointer-events: none;
-    filter: blur(4px);
-    transform: rotate(20deg);
-  }
+.orbit::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 280px;
+  height: 280px;
+  margin: -140px 0 0 -140px;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at center,
+      rgba(255,255,255,0.2) 10%,
+      transparent 70%);
+  filter: blur(20px);
+  opacity: 0.6;
+  animation: pulseWarp 5s ease-in-out infinite alternate;
+  z-index: -1;
+}
 
-  #inputForm {
-    background: #222;
-    border-top: 2px solid #d16a6a;
-    padding: 18px 24px;
-    display: flex;
-    gap: 16px;
-    box-shadow:
-      0 -10px 40px rgba(209, 106, 106, 0.35);
-    border-radius: 0 0 24px 24px;
+@keyframes slowRotate {
+  0% {
+    transform: rotateZ(0deg) scale(1);
   }
+  50% {
+    transform: rotateZ(180deg) scale(1.05);
+  }
+  100% {
+    transform: rotateZ(360deg) scale(1);
+  }
+}
 
-  #inputForm input[type="text"] {
-    flex-grow: 1;
-    padding: 16px 22px;
-    font-size: 17px;
-    background-color: #3b3b3b;
-    color: #f8f0f0;
-    border: 2px solid #d16a6a;
-    border-radius: 10px 0 0 10px;
-    outline: none;
-    transition: border-color 0.3s ease;
+@keyframes pulseWarp {
+  0% {
+    transform: scale(1) translate(0, 0) rotate(0deg);
+    opacity: 0.5;
   }
+  100% {
+    transform: scale(1.1) translate(5px, -5px) rotate(10deg);
+    opacity: 0.7;
+  }
+}
 
-  #inputForm input[type="text"]:focus {
-    border-color: #ff8a8a;
-    box-shadow: 0 0 12px #ff6a6aaa;
-  }
 
-  #inputForm button {
-    background: linear-gradient(145deg, #d16a6a, #ff8a8a);
-    color: white;
-    border: none;
-    padding: 0 28px;
-    font-size: 17px;
-    cursor: pointer;
-    border-radius: 0 10px 10px 0;
-    transition: all 0.25s ease-in-out;
-    box-shadow:
-      0 2px 10px rgba(0, 0, 0, 0.6),
-      inset 0 0 14px rgba(255, 140, 140, 0.8);
-  }
 
-  #inputForm button:hover {
-    background: linear-gradient(145deg, #ff8a8a, #d16a6a);
-    box-shadow:
-      0 5px 18px rgba(255, 100, 100, 0.85),
-      inset 0 0 20px rgba(255, 255, 255, 0.85);
-    transform: scale(1.05);
-  }
+#messages {
+  padding: 60px 20px 10px 20px; 
+  flex-grow: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 30px 20px 10px 20px;
+  gap: 10px;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+  position: relative;
+  z-index: 2; /* 원보다 위에 나오도록 */
+}
 
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+.message {
+  position: relative;
+  line-height: 1.6;
+  padding: 14px 22px;
+  border-radius: 24px;
+  max-width: 70%;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  animation: fadeIn 0.3s ease-in;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  font-size: 1.05rem;
+}
+
+.bot {
+  align-self: flex-start;
+  background: #3A3F44;
+  color: #D4D7DC;
+  text-align: left;
+  margin-left: 10px;
+  border-left: 6px solid #181a1c;
+  padding-left: 18px;
+  box-shadow: 0 2px 8px rgba(100, 149, 237, 0.25);
+}
+
+.user {
+  align-self: flex-end;
+  background: #3A3F44;
+  color: #D4D7DC;
+  text-align: right;
+  margin-right: 10px;
+  border-right: 6px solid #181a1c;
+  padding-right: 18px;
+  box-shadow: 0 2px 8px rgba(100, 149, 237, 0.25);
+}
+
+#inputArea {
+  padding: 16px 30px;
+  background: linear-gradient(145deg, #081d35 ,#0a386d);
+  border-top: 1px solid #222831;
+  display: flex;
+  justify-content: center;
+  /* 입력창 무조건 아래에 붙게 */
+  flex-shrink: 0;
+}
+
+#inputForm {
+  display: flex;
+  width: 100%;
+  max-width: 900px;
+}
+
+#messageInput {
+  flex-grow: 1;
+  border: none;
+  border-radius: 18px 0 0 18px;
+  padding: 14px 20px;
+  font-size: 1.1rem;
+  background: linear-gradient(145deg, #3A3F44);
+  color: #EEEEEE;  /* 글자색은 어두운 배경에 맞게 밝게 */
+  outline: none;
+  box-shadow:
+    inset 0 0 8px rgba(0, 0, 0, 0.7);
+  transition: background 0.3s ease;
+}
+
+
+#messageInput::placeholder {
+  color: #999999;
+}
+
+#messageInput:focus {
+  background-color: #2a2f36;
+}
+
+#sendBtn {
+  background: linear-gradient(145deg, #3A3F44);
+  border: none;
+  color: white;
+  font-weight: 600;
+  padding: 0 28px;
+  border-radius: 0 18px 18px 0;
+  cursor: pointer;
+  font-size: 1.1rem;
+  box-shadow:
+    0 3px 10px rgba(29, 32, 34, 0.7);
+  transition: background 0.3s ease;
+}
+
+#sendBtn:hover {
+  background: linear-gradient(145deg, #010e16, #0a386d);
+  box-shadow:
+    0 5px 15px rgba(35, 37, 38, 0.9);
+  transform: scale(1.05);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
 </style>
 </head>
 <body>
+  <div id="appContainer">
+    <div id="chatArea">
+      <div class="orbit"></div> <!-- 빨강/파랑 orbit 대신 이거 하나만 -->
+      <div id="messages"></div>
+    </div>
 
-<div id="chat">
-  <div id="messagesContainer">
-    <div id="messages"></div>
+    <div id="inputArea">
+      <form id="inputForm">
+        <input type="text" id="messageInput" autocomplete="off" placeholder="메시지를 입력하세요..." />
+        <button type="submit" id="sendBtn">전송</button>
+      </form>
+    </div>
   </div>
 
-  <form id="inputForm">
-    <input type="text" id="messageInput" autocomplete="off" placeholder="메시지를 입력하세요..." />
-    <button type="submit">전송</button>
-  </form>
-</div>
+</body>
+
 
 <script>
   const messagesDiv = document.getElementById('messages');
@@ -203,13 +317,14 @@
       eventSource = null;
     }
 
+    // URL 바꿔서 연결하세요
     const url = 'https://yuchan5386-api-0.hf.space/chat?message=' + encodeURIComponent(message);
     eventSource = new EventSource(url);
 
     let accumulatedResponse = '';
 
     eventSource.onopen = () => {
-      console.log('Connected to API');
+      console.log('SSE 연결됨');
     };
 
     eventSource.onmessage = (event) => {
@@ -238,7 +353,7 @@
     };
 
     eventSource.onerror = (err) => {
-      console.error('EventSource error:', err);
+      console.error('SSE 에러:', err);
       if (eventSource) {
         eventSource.close();
         eventSource = null;
@@ -247,6 +362,5 @@
     };
   });
 </script>
-
 </body>
 </html>

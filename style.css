@@ -1,0 +1,188 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo&display=swap');
+
+html, body {
+  margin: 0; padding: 0; height: 100%;
+  background: url('https://www.transparenttextures.com/patterns/paper-fibers.png'), #fdf6e3;
+  font-family: 'Nanum Myeongjo', serif;
+  color: #2c2c2c;
+  overflow: hidden;
+}
+
+#appContainer {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* 좌측 채팅방 목록 */
+#roomList {
+  width: 260px;
+  background: #f5f0e6;
+  border-right: 1px solid #ccc;
+  padding: 20px 10px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+#roomList h2 {
+  margin: 0 0 20px 10px;
+  font-weight: 700;
+  color: #7fb8a4;
+}
+
+.room {
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  background: #ffffffd9;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+}
+
+.room:hover {
+  background: #d0b98c;
+  color: #fff;
+}
+
+.room.active {
+  background: #7fb8a4;
+  color: #fff;
+  font-weight: 700;
+}
+
+/* 우측 채팅 영역 */
+#chatArea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 60px 30px 20px 30px;
+  background: transparent;
+}
+
+#logoArea {
+  filter: none;
+  padding-top: 20px;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+#messages {
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-grow: 1;
+  overflow-y: auto;
+  height: auto;
+}
+
+.message {
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #ffffffd9;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  font-size: 1rem;
+  line-height: 1.5;
+  word-break: break-word;
+  white-space: pre-wrap; 
+}
+
+.bot {
+  align-self: flex-start;
+  text-align: left;
+  background: #f4f4f4;
+  border-left: 4px solid #7fb8a4;
+}
+
+.user {
+  align-self: flex-end;
+  text-align: right;
+  background: #fefefe;
+  border-right: 4px solid #d0b98c;
+}
+
+  pre {
+    background-color: #2d2d2d;
+    color: #f8f8f2;
+    padding: 12px;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 14px;
+    white-space: pre-wrap; /* 줄바꿈 깨짐 방지 */
+  }
+
+  code {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 14px;
+  }
+
+
+#inputArea {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 16px;
+  background: #f5f0e6;
+  border-top: 1px solid #ccc;
+  position: fixed;
+  bottom: 0;
+  width: calc(100% - 260px); /* 좌측 영역 빼고 */
+  z-index: 10;
+  box-sizing: border-box;
+}
+
+#inputForm {
+  display: flex;
+  width: 100%;
+  max-width: 720px;
+}
+
+#messageInput {
+  flex: 1;
+  padding: 10px 16px;
+  border: 1px solid #ccc;
+  border-radius: 12px 0 0 12px;
+  font-size: 1rem;
+  background: #fff;
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.1);
+}
+
+#sendBtn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 0 12px 12px 0;
+  font-size: 1rem;
+  background: #ded6c8;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#sendBtn:hover {
+  background: #cdbda8;
+  transform: scale(1.02);
+}
+
+.kode-block {
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 8px 0;
+  font-family: 'Courier New', monospace;
+  white-space: pre-wrap;
+  line-height: 1.4;
+}
+
+/* 로고 SVG 크기 조절 */
+#s3genLogo {
+  width: 220px;
+  height: 100px;
+}

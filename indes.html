@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="style.css" />
+
+<title>S3GeN</title>
+
+<script type="module">
+  import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
+
+  let kodeClient;
+  let searcherClient;
+
+  async function initKodeClient() {
+    kodeClient = await Client.connect("Yuchan5386/Kode");
+    console.log("Kode Client 연결 완료");
+  }
+
+  async function sendToKode(message) {
+    if (!kodeClient) {
+      console.error("Kode 클라이언트가 준비되지 않았어요!");
+      return "❌ Kode 연결 실패!";
+    }
+    try {
+      const result = await kodeClient.predict("/chat", { message });
+      return result.data;
+    } catch (err) {
+      console.error("Kode 요청 실패:", err);
+      return "❌ 오류가 발생했어요.";
+    }
+  }
+
+  async function initSearcherClient() {
+    searcherClient = await Client.connect("Yuchan5386/Searcher");
+    console.log("Searcher Client 연결 완료");
+  }
+
+  async function sendToSearcher(query) {
+    if (!searcherClient) {
+      console.error("Searcher 클라이언트가 준비되지 않았어요!");
+      return "❌ Searcher 연결 실패!";
+    }
+    try {
+      const result = await searcherClient.predict("/on_submit", { query });
+      return result.data;
+    } catch (err) {
+      console.error("Searcher 요청 실패:", err);
+      return "❌ 오류가 발생했어요.";
+    }
+  }
+
+  // 초기화 호출
+  initKodeClient();
+  initSearcherClient();
+
+  // 전역 등록
+  window.sendToKode = sendToKode;
+  window.sendToSearcher = sendToSearcher;
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link rel="stylesheet" href="style.css" />
+
+</head>
+<body>
+  <div id="appContainer">
+    <div id="roomList">
+      <h2>채팅방 목록</h2>
+      <div class="room active" data-room-id="room1">일반 대화</div>
+      <div class="room" data-room-id="room2">코딩</div>
+      <div class="room" data-room-id="room3">검색</div>
+      <div class="room" data-room-id="room4">기타</div>
+    </div>
+
+    <div id="chatArea">
+      <div id="logoArea">
+        <svg id="s3genLogo" viewBox="0 0 220 100" xmlns="http://www.w3.org/2000/svg" aria-label="소담이 별자리" role="img" >
+          <!-- 별 위치 (옥색) -->
+          <circle cx="20" cy="50" r="4" fill="#7fb8a4" />
+          <circle cx="60" cy="20" r="4" fill="#7fb8a4" />
+          <circle cx="100" cy="40" r="4" fill="#7fb8a4" />
+          <circle cx="140" cy="25" r="4" fill="#7fb8a4" />
+          <circle cx="180" cy="55" r="4" fill="#7fb8a4" />
+          <circle cx="200" cy="80" r="4" fill="#7fb8a4" />
+          <!-- 별 연결선 -->
+          <line x1="20" y1="50" x2="60" y2="20" stroke="#7fb8a4" stroke-width="1.5" />
+          <line x1="60" y1="20" x2="100" y2="40" stroke="#7fb8a4" stroke-width="1.5" />
+          <line x1="100" y1="40" x2="140" y2="25" stroke="#7fb8a4" stroke-width="1.5" />
+          <line x1="140" y1="25" x2="180" y2="55" stroke="#7fb8a4" stroke-width="1.5" />
+          <line x1="180" y1="55" x2="200" y2="80" stroke="#7fb8a4" stroke-width="1.5" />
+          <!-- 한글 로고 -->
+          <text x="110" y="95" fill="#7fb8a4" font-family="'Nanum Myeongjo', serif" font-weight="700" font-size="22" letter-spacing="2" text-anchor="middle">
+            소담이
+          </text>
+        </svg>
+      </div>
+
+      <div id="messages"></div>
+
+      <div id="inputArea">
+        <form id="inputForm">
+          <input type="text" id="messageInput" autocomplete="off" placeholder="메시지를 입력하세요..." />
+          <button type="submit" id="sendBtn">전송</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const messagesDiv = document.getElementById('messages');
+  const inputForm = document.getElementById('inputForm');
+  const messageInput = document.getElementById('messageInput');
+  const rooms = document.querySelectorAll('.room');
+
+  let eventSource = null;
+
+  const chatData = {
+    room1: [],
+    room2: [],
+    room3: [],
+    room4: []
+  };
+
+  let currentRoom = 'room1';
+
+  function appendMessage(text, sender, isHTML = false) {
+    const msg = document.createElement('div');
+    msg.classList.add('message', sender);
+    if (isHTML) {
+      msg.innerHTML = text;
+    } else {
+      msg.textContent = text;
+    }
+    messagesDiv.appendChild(msg);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+
+  function escapeHtml(str) {
+    return str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  function renderMessages(roomId) {
+    messagesDiv.innerHTML = '';
+    chatData[roomId].forEach(({ text, sender }) => {
+      appendMessage(text, sender);
+    });
+  }
+
+  rooms.forEach(room => {
+    room.addEventListener('click', () => {
+      if (room.dataset.roomId === currentRoom) return;
+
+      document.querySelector('.room.active').classList.remove('active');
+      room.classList.add('active');
+
+      currentRoom = room.dataset.roomId;
+      renderMessages(currentRoom);
+    });
+  });
+
+  inputForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const message = messageInput.value.trim();
+    if (!message) return;
+
+    chatData[currentRoom].push({ text: message, sender: 'user' });
+    appendMessage(message, 'user');
+    messageInput.value = '';
+
+    if (currentRoom === 'room1') {
+      if (eventSource) {
+        eventSource.close();
+        eventSource = null;
+      }
+
+      const url = 'https://yuchan5386-api-0.hf.space/chat?message=' + encodeURIComponent(message) + '&room=' + encodeURIComponent(currentRoom);
+      eventSource = new EventSource(url);
+
+      let accumulatedResponse = '';
+
+      eventSource.onopen = () => {
+        console.log('SSE 연결됨');
+      };
+
+      eventSource.onmessage = (event) => {
+        if (event.data === '[DONE]') {
+          eventSource.close();
+          eventSource = null;
+          return;
+        }
+
+        const token = event.data;
+        if (!accumulatedResponse) {
+          accumulatedResponse = token;
+        } else if (/^[,\.!?]$/.test(token)) {
+          accumulatedResponse += token;
+        } else {
+          accumulatedResponse += ' ' + token;
+        }
+
+        const lastBotMessage = messagesDiv.querySelector('.bot:last-child');
+        if (lastBotMessage) {
+          lastBotMessage.textContent = accumulatedResponse;
+        } else {
+          appendMessage(accumulatedResponse, 'bot');
+        }
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+        chatData[currentRoom].splice(-1, 1, { text: accumulatedResponse, sender: 'bot' });
+      };
+
+      eventSource.onerror = (err) => {
+        console.error('SSE 에러:', err);
+        if (eventSource) {
+          eventSource.close();
+          eventSource = null;
+        }
+        appendMessage('❌ 오류가 발생했습니다.', 'bot');
+      };
+
+    } else if (currentRoom === 'room2') {
+      const loadingDiv = document.createElement('div');
+      loadingDiv.classList.add('message', 'bot');
+      loadingDiv.textContent = "🤖 코드를 생성 중입니다...";
+      messagesDiv.appendChild(loadingDiv);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+      try {
+        const botReply = await window.sendToKode(message);
+        console.log("Kode 응답(원본):", botReply);
+
+        loadingDiv.remove();
+
+        if (typeof botReply === 'string') {
+          const html = marked.parse(botReply);
+          appendMessage(html, 'bot', true);
+          chatData[currentRoom].push({ text: botReply, sender: 'bot' });
+        } else if (typeof botReply === 'object' && botReply !== null) {
+          const jsonText = JSON.stringify(botReply, null, 2);
+          appendMessage(`<pre class="kode-block">${escapeHtml(jsonText)}</pre>`, 'bot', true);
+          chatData[currentRoom].push({ text: jsonText, sender: 'bot' });
+        } else {
+          const strText = String(botReply);
+          const html = marked.parse(strText);
+          appendMessage(html, 'bot', true);
+          chatData[currentRoom].push({ text: strText, sender: 'bot' });
+        }
+      } catch (error) {
+        loadingDiv.remove();
+
+        const errorMsg = '❌ 오류 발생! 다시 시도해 주세요.';
+        appendMessage(errorMsg, 'bot');
+        chatData[currentRoom].push({ text: errorMsg, sender: 'bot' });
+
+        console.error(error);
+      }
+
+    } else if (currentRoom === 'room3') {
+      const loadingDiv = document.createElement('div');
+      loadingDiv.classList.add('message', 'bot');
+      loadingDiv.textContent = "🔍 검색 중입니다...";
+      messagesDiv.appendChild(loadingDiv);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+      try {
+        const botReply = await window.sendToSearcher(message);
+        console.log("Searcher 응답(원본):", botReply);
+
+        loadingDiv.remove();
+
+        if (typeof botReply === 'string') {
+          const html = marked.parse(botReply);
+          appendMessage(html, 'bot', true);
+          chatData[currentRoom].push({ text: botReply, sender: 'bot' });
+        } else if (typeof botReply === 'object' && botReply !== null) {
+          const jsonText = JSON.stringify(botReply, null, 2);
+          appendMessage(`<pre class="kode-block">${escapeHtml(jsonText)}</pre>`, 'bot', true);
+          chatData[currentRoom].push({ text: jsonText, sender: 'bot' });
+        } else {
+          const strText = String(botReply);
+          const html = marked.parse(strText);
+          appendMessage(html, 'bot', true);
+          chatData[currentRoom].push({ text: strText, sender: 'bot' });
+        }
+      } catch (error) {
+        loadingDiv.remove();
+
+        const errorMsg = '❌ 오류 발생! 다시 시도해 주세요.';
+        appendMessage(errorMsg, 'bot');
+        chatData[currentRoom].push({ text: errorMsg, sender: 'bot' });
+
+        console.error(error);
+      }
+
+    } else {
+      const reply = "아직 준비 중인 방이에요!";
+      chatData[currentRoom].push({ text: reply, sender: 'bot' });
+      appendMessage(reply, 'bot');
+    }
+  });
+
+  renderMessages(currentRoom);
+</script>
+</body>
+</html>

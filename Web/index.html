@@ -6,167 +6,224 @@
 <title>S3GeN</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Nanum+Myeongjo&display=swap');
 
-html, body {
-  margin: 0; padding: 0; height: 100%;
-  background: url('https://www.transparenttextures.com/patterns/paper-fibers.png'), #fdf6e3; /* 한지 질감 + 베이지 */
-  font-family: 'Nanum Myeongjo', serif;
-  color: #2c2c2c;
-  overflow: hidden;
-}
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: url('https://www.transparenttextures.com/patterns/paper-fibers.png'), #fdf6e3;
+    font-family: 'Nanum Myeongjo', serif;
+    color: #2c2c2c;
+    overflow: hidden;
+  }
 
-#appContainer::before {
-  display: none; /* 플라즈마 효과 제거 */
-}
+  #appContainer {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+  }
 
-#chatArea {
-  padding: 60px 30px 20px 30px;
-  background: transparent;
-}
+  /* 좌측 채팅방 목록 */
+  #roomList {
+    width: 260px;
+    background: #f5f0e6;
+    border-right: 1px solid #ccc;
+    padding: 20px 10px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+  }
 
-#logoArea {
-  filter: none;
-  padding-top: 20px;
-}
+  #roomList h2 {
+    margin: 0 0 20px 10px;
+    font-weight: 700;
+    color: #7fb8a4;
+  }
 
-#messages {
-  padding: 0 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  height: calc(100vh - 200px);
-  overflow-y: auto;
-}
+  .room {
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    background: #ffffffd9;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease;
+  }
 
-.message {
-  max-width: 70%;
-  padding: 10px 14px;
-  border-radius: 12px;
-  background: #ffffffd9;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  font-size: 1rem;
-  line-height: 1.5;
-  word-break: break-word;
-}
+  .room:hover {
+    background: #d0b98c;
+    color: #fff;
+  }
 
-.bot {
-  align-self: flex-start;
-  text-align: left;
-  background: #f4f4f4;
-  border-left: 4px solid #7fb8a4;
-}
+  .room.active {
+    background: #7fb8a4;
+    color: #fff;
+    font-weight: 700;
+  }
 
-.user {
-  align-self: flex-end;
-  text-align: right;
-  background: #fefefe;
-  border-right: 4px solid #d0b98c;
-}
+  /* 우측 채팅 영역 */
+  #chatArea {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 60px 30px 20px 30px;
+    background: transparent;
+  }
 
-#inputArea {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 12px 16px;
-  background: #f5f0e6;
-  border-top: 1px solid #ccc;
-  position: fixed; /* 👈 요거 추가! */
-  bottom: 0;        /* 👈 화면 아래 고정 */
-  width: 100%;      /* 👈 전체 너비 사용 */
-  z-index: 10;      /* 👈 혹시 몰라서 위로 띄움 */
-}
+  #logoArea {
+    filter: none;
+    padding-top: 20px;
+    flex-shrink: 0;
+    user-select: none;
+  }
 
+  #messages {
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-grow: 1;
+    overflow-y: auto;
+    height: auto;
+  }
 
-#inputForm {
-  display: flex;
-  width: 100%;
-  max-width: 720px;
-}
+  .message {
+    max-width: 70%;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: #ffffffd9;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    font-size: 1rem;
+    line-height: 1.5;
+    word-break: break-word;
+  }
 
-#messageInput {
-  flex: 1;
-  padding: 10px 16px;
-  border: 1px solid #ccc;
-  border-radius: 12px 0 0 12px;
-  font-size: 1rem;
-  background: #fff;
-  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.1);
-}
+  .bot {
+    align-self: flex-start;
+    text-align: left;
+    background: #f4f4f4;
+    border-left: 4px solid #7fb8a4;
+  }
 
-#sendBtn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 0 12px 12px 0;
-  font-size: 1rem;
-  background: #ded6c8;
-  color: #333;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
+  .user {
+    align-self: flex-end;
+    text-align: right;
+    background: #fefefe;
+    border-right: 4px solid #d0b98c;
+  }
 
-#sendBtn:hover {
-  background: #cdbda8;
-  transform: scale(1.02);
-}
+  #inputArea {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 12px 16px;
+    background: #f5f0e6;
+    border-top: 1px solid #ccc;
+    position: fixed;
+    bottom: 0;
+    width: calc(100% - 260px); /* 좌측 영역 빼고 */
+    z-index: 10;
+    box-sizing: border-box;
+  }
 
-.orbit {
-  display: none; /* 블랙홀 애니메이션 숨기기 */
-}
+  #inputForm {
+    display: flex;
+    width: 100%;
+    max-width: 720px;
+  }
 
+  #messageInput {
+    flex: 1;
+    padding: 10px 16px;
+    border: 1px solid #ccc;
+    border-radius: 12px 0 0 12px;
+    font-size: 1rem;
+    background: #fff;
+    box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.1);
+  }
 
+  #sendBtn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 0 12px 12px 0;
+    font-size: 1rem;
+    background: #ded6c8;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  #sendBtn:hover {
+    background: #cdbda8;
+    transform: scale(1.02);
+  }
+
+  /* 로고 SVG 크기 조절 */
+  #s3genLogo {
+    width: 220px;
+    height: 100px;
+  }
 </style>
 </head>
 <body>
   <div id="appContainer">
-    <div id="logoArea">
-      <svg id="s3genLogo" width="220" height="100" viewBox="0 0 220 100" xmlns="http://www.w3.org/2000/svg" aria-label="소담이 별자리" role="img">
-        <!-- 별 위치 (옥색) -->
-        <circle cx="20" cy="50" r="4" fill="#7fb8a4" />
-        <circle cx="60" cy="20" r="4" fill="#7fb8a4" />
-        <circle cx="100" cy="40" r="4" fill="#7fb8a4" />
-        <circle cx="140" cy="25" r="4" fill="#7fb8a4" />
-        <circle cx="180" cy="55" r="4" fill="#7fb8a4" />
-        <circle cx="200" cy="80" r="4" fill="#7fb8a4" />
-        
-        <!-- 별 연결선 -->
-        <line x1="20" y1="50" x2="60" y2="20" stroke="#7fb8a4" stroke-width="1.5" />
-        <line x1="60" y1="20" x2="100" y2="40" stroke="#7fb8a4" stroke-width="1.5" />
-        <line x1="100" y1="40" x2="140" y2="25" stroke="#7fb8a4" stroke-width="1.5" />
-        <line x1="140" y1="25" x2="180" y2="55" stroke="#7fb8a4" stroke-width="1.5" />
-        <line x1="180" y1="55" x2="200" y2="80" stroke="#7fb8a4" stroke-width="1.5" />
-        
-        <!-- 한글 로고 -->
-        <text x="110" y="95" fill="#7fb8a4" font-family="'Nanum Myeongjo', serif" font-weight="700" font-size="22" letter-spacing="2" text-anchor="middle">
-          소담이
-        </text>
-      </svg>
+    <div id="roomList">
+      <h2>채팅방 목록</h2>
+      <div class="room active" data-room-id="room1">일반 대화</div>
+      <div class="room" data-room-id="room2">기술 상담</div>
+      <div class="room" data-room-id="room3">취미 이야기</div>
+      <div class="room" data-room-id="room4">기타</div>
     </div>
 
     <div id="chatArea">
+      <div id="logoArea">
+        <svg id="s3genLogo" viewBox="0 0 220 100" xmlns="http://www.w3.org/2000/svg" aria-label="소담이 별자리" role="img" >
+          <!-- 별 위치 (옥색) -->
+          <circle cx="20" cy="50" r="4" fill="#7fb8a4" />
+          <circle cx="60" cy="20" r="4" fill="#7fb8a4" />
+          <circle cx="100" cy="40" r="4" fill="#7fb8a4" />
+          <circle cx="140" cy="25" r="4" fill="#7fb8a4" />
+          <circle cx="180" cy="55" r="4" fill="#7fb8a4" />
+          <circle cx="200" cy="80" r="4" fill="#7fb8a4" />
+          <!-- 별 연결선 -->
+          <line x1="20" y1="50" x2="60" y2="20" stroke="#7fb8a4" stroke-width="1.5" />
+          <line x1="60" y1="20" x2="100" y2="40" stroke="#7fb8a4" stroke-width="1.5" />
+          <line x1="100" y1="40" x2="140" y2="25" stroke="#7fb8a4" stroke-width="1.5" />
+          <line x1="140" y1="25" x2="180" y2="55" stroke="#7fb8a4" stroke-width="1.5" />
+          <line x1="180" y1="55" x2="200" y2="80" stroke="#7fb8a4" stroke-width="1.5" />
+          <!-- 한글 로고 -->
+          <text x="110" y="95" fill="#7fb8a4" font-family="'Nanum Myeongjo', serif" font-weight="700" font-size="22" letter-spacing="2" text-anchor="middle">
+            소담이
+          </text>
+        </svg>
+      </div>
+
       <div id="messages"></div>
+
+      <div id="inputArea">
+        <form id="inputForm">
+          <input type="text" id="messageInput" autocomplete="off" placeholder="메시지를 입력하세요..." />
+          <button type="submit" id="sendBtn">전송</button>
+        </form>
+      </div>
     </div>
-
-    <div id="inputArea">
-      <form id="inputForm">
-        <input
-          type="text"
-          id="messageInput"
-          autocomplete="off"
-          placeholder="메시지를 입력하세요..."
-        />
-        <button type="submit" id="sendBtn">전송</button>
-      </form>
-    </div>
-
-</body>
-
-
+  </div>
 
 <script>
   const messagesDiv = document.getElementById('messages');
   const inputForm = document.getElementById('inputForm');
   const messageInput = document.getElementById('messageInput');
+  const rooms = document.querySelectorAll('.room');
+
+  // 각 방별 메시지 저장 객체
+  const chatData = {
+    room1: [],
+    room2: [],
+    room3: [],
+    room4: []
+  };
+
+  let currentRoom = 'room1';
 
   function appendMessage(text, sender) {
     const msg = document.createElement('div');
@@ -176,22 +233,46 @@ html, body {
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
   }
 
-  let eventSource = null;
+  function renderMessages(roomId) {
+    messagesDiv.innerHTML = '';
+    chatData[roomId].forEach(({ text, sender }) => {
+      appendMessage(text, sender);
+    });
+  }
 
+  // 방 선택 시
+  rooms.forEach(room => {
+    room.addEventListener('click', () => {
+      if (room.dataset.roomId === currentRoom) return; // 같은 방 클릭 무시
+
+      // 활성화 표시 토글
+      document.querySelector('.room.active').classList.remove('active');
+      room.classList.add('active');
+
+      currentRoom = room.dataset.roomId;
+      renderMessages(currentRoom);
+    });
+  });
+
+  // 메시지 입력 후 제출 이벤트
   inputForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const message = messageInput.value.trim();
     if (!message) return;
+
+    // 유저 메시지 저장 및 표시
+    chatData[currentRoom].push({ text: message, sender: 'user' });
     appendMessage(message, 'user');
     messageInput.value = '';
 
+    // 기존 SSE 닫기
     if (eventSource) {
       eventSource.close();
       eventSource = null;
     }
 
-    // URL 바꿔서 연결하세요
-    const url = 'https://yuchan5386-api-0.hf.space/chat?message=' + encodeURIComponent(message);
+    // 서버 연결 URL (roomId 포함)
+    const url = 'https://yuchan5386-api-0.hf.space/chat?message=' + encodeURIComponent(message) + '&room=' + encodeURIComponent(currentRoom);
     eventSource = new EventSource(url);
 
     let accumulatedResponse = '';
@@ -216,6 +297,7 @@ html, body {
         accumulatedResponse += ' ' + token;
       }
 
+      // 봇 메시지 실시간 업데이트
       const lastBotMessage = messagesDiv.querySelector('.bot:last-child');
       if (lastBotMessage) {
         lastBotMessage.textContent = accumulatedResponse;
@@ -223,6 +305,11 @@ html, body {
         appendMessage(accumulatedResponse, 'bot');
       }
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+      // 봇 메시지 저장 (실시간은 마지막에 한 번만 저장해도 무방)
+      // renderMessages 함수에서도 마지막 메시지만 보여줄 수 있도록 업데이트 가능
+      chatData[currentRoom].splice(-1, 1, { text: accumulatedResponse, sender: 'bot' });
+
     };
 
     eventSource.onerror = (err) => {
@@ -234,6 +321,12 @@ html, body {
       appendMessage('❌ 오류가 발생했습니다.', 'bot');
     };
   });
+
+  let eventSource = null;
+
+  // 페이지 로드 시 기본 방 메시지 렌더링
+  renderMessages(currentRoom);
 </script>
+
 </body>
 </html>
